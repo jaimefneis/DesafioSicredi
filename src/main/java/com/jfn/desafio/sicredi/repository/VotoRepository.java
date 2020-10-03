@@ -9,5 +9,5 @@ import com.jfn.desafio.sicredi.entity.Voto;
 
 @Repository
 public interface VotoRepository extends JpaRepository<Voto, Integer> {
-	//List<Voto> findBySessaoVotacaoIdAndCpf(int sessaoVotacaoId, String cpf);
+	List<Voto> findByPautaIdAndCpf(int pautaId, String cpf);
 }

@@ -5,17 +5,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jfn.desafio.sicredi.entity.Pauta;
-import com.jfn.desafio.sicredi.entity.SessaoVotacao;
 import com.jfn.desafio.sicredi.entity.Voto;
 import com.jfn.desafio.sicredi.exception.CpfDuplicatedForVotingException;
+import com.jfn.desafio.sicredi.exception.CpfInvalidException;
 import com.jfn.desafio.sicredi.exception.PautaNotFoundException;
 import com.jfn.desafio.sicredi.exception.SessaoVotacaoNotAvailableForVotingException;
-import com.jfn.desafio.sicredi.exception.SessaoVotacaoNotFoundException;
-import com.jfn.desafio.sicredi.repository.SessaoVotacaoRepository;
+import com.jfn.desafio.sicredi.repository.PautaRepository;
 import com.jfn.desafio.sicredi.repository.VotoRepository;
 
 @Service
@@ -25,37 +22,47 @@ public class VotoService {
 	private VotoRepository votoRepository;
 	
 	@Autowired
-	private SessaoVotacaoRepository sessaoVotacaoRepository;
+	private PautaRepository pautaRepository;
 	
-	public Voto votar(int sessaoVotacaoId, String cpf, boolean agree) throws SessaoVotacaoNotFoundException, SessaoVotacaoNotAvailableForVotingException, CpfDuplicatedForVotingException {
+	public Voto votar(int pautaId, String cpf, boolean agree) {
 		
-		SessaoVotacao sessaoVotacao = this.sessaoVotacaoRepository.findById(sessaoVotacaoId)
-				.orElseThrow(() -> new SessaoVotacaoNotFoundException(sessaoVotacaoId));
+		Pauta pauta = this.pautaRepository.findById(pautaId)
+				.orElseThrow(() -> new PautaNotFoundException(pautaId));
 				
-		if (!this.isSessaoVotacaoOpen(sessaoVotacao)) {
-			throw new SessaoVotacaoNotAvailableForVotingException();
+		if (!this.isSessaoVotacaoOpen(pauta)) {
+			throw new SessaoVotacaoNotAvailableForVotingException(pautaId);
 		}
 		
 		if (!this.isCpfValid(cpf)) {
-			
+			throw new CpfInvalidException(cpf);
 		}
 		
-		if (this.isCpfDuplicatedForVoting(sessaoVotacaoId, cpf)) {
-			throw new CpfDuplicatedForVotingException();
+		if (this.isCpfDuplicatedForVoting(pautaId, cpf)) {
+			throw new CpfDuplicatedForVotingException(pautaId, cpf);
 		}
+		
+		if (agree)
+		{
+			pauta.setTotalYes(pauta.getTotalYes() + 1);
+		}
+		else
+		{
+			pauta.setTotalNo(pauta.getTotalNo() + 1);
+		}
+		this.pautaRepository.save(pauta);
 		
 		Voto voto = new Voto();
-		voto.setSessaoVotacao(sessaoVotacao);
+		voto.setPauta(pauta);
 		voto.setCpf(cpf);
 		voto.setAgree(agree);
 		
 		return this.votoRepository.save(voto);		
 	}
 	
-	private boolean isSessaoVotacaoOpen(SessaoVotacao sessaoVotacao) {
+	private boolean isSessaoVotacaoOpen(Pauta pauta) {
 		Date now = new Date();
 		
-		return now.after(sessaoVotacao.getStartDate()) && now.before(sessaoVotacao.getEndDate());
+		return now.after(pauta.getStartDate()) && now.before(pauta.getEndDate());
 	}
 
 	private boolean isCpfValid(String cpf)
@@ -63,11 +70,10 @@ public class VotoService {
 		return true;
 	}
 	
-	private boolean isCpfDuplicatedForVoting(int sessaoVotacaoId, String cpf)
-	{
-		return false;
-		//List<Voto> votos = this.votoRepository.findBySessaoVotacaoIdAndCpf(sessaoVotacaoId, cpf);
-		//return votos != null && votos.size() > 0;
+	private boolean isCpfDuplicatedForVoting(int pautaId, String cpf)
+	{		
+		List<Voto> votos = this.votoRepository.findByPautaIdAndCpf(pautaId, cpf);
+		return votos != null && votos.size() > 0;
 	}
 	
 }

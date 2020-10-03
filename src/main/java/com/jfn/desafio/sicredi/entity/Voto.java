@@ -1,7 +1,9 @@
 package com.jfn.desafio.sicredi.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -11,16 +13,15 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="voto")//, uniqueConstraints = {@UniqueConstraint(columnNames= {"sessao_votacao_id", "cpf"})})
 public class Voto {
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 		
 	private String cpf;	
 	private boolean agree;
 	
-	@ManyToOne
-	private SessaoVotacao sessaoVotacao;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Pauta pauta;
 }
