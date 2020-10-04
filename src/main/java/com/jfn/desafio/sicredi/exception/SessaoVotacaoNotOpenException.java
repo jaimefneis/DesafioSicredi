@@ -1,6 +1,6 @@
 package com.jfn.desafio.sicredi.exception;
 
-public class SessaoVotacaoNotOpenException extends RuntimeException {
+public class SessaoVotacaoNotOpenException extends SicrediRuntimeException {
 	
 	public SessaoVotacaoNotOpenException(int pautaId)
 	{

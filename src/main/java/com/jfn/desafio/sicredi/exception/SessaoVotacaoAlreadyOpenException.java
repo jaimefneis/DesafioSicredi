@@ -1,6 +1,6 @@
 package com.jfn.desafio.sicredi.exception;
 
-public class SessaoVotacaoAlreadyOpenException extends RuntimeException {
+public class SessaoVotacaoAlreadyOpenException extends SicrediRuntimeException {
 
 	public SessaoVotacaoAlreadyOpenException(int pautaId)
 	{
