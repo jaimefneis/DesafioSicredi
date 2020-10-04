@@ -41,7 +41,7 @@ public class VotoService {
 			throw new CpfDuplicatedForVotingException(pautaId, cpf);
 		}
 		
-		if (agree)
+		if (agree) // TODO Race condition can occur here
 		{
 			pauta.setTotalYes(pauta.getTotalYes() + 1);
 		}

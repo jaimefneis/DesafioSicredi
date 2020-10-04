@@ -6,20 +6,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jfn.desafio.sicredi.entity.Pauta;
+import com.jfn.desafio.sicredi.entity.Voto;
 import com.jfn.desafio.sicredi.exception.PautaNotFoundException;
 import com.jfn.desafio.sicredi.exception.SessaoVotacaoAlreadyOpenException;
 import com.jfn.desafio.sicredi.service.PautaService;
+import com.jfn.desafio.sicredi.service.VotoService;
+
+import io.swagger.annotations.Api;
 
 @RestController
-public class PautaController {
+@RequestMapping(path="/api/v1/assembleia")
+@Api(tags = "assembleia")
+public class AssembleiaController {
 	
 	@Autowired
 	private PautaService pautaService;
+	
+	@Autowired
+	private VotoService votoService;
+	
+	@PostMapping("/votar/{pautaId}")
+	public Voto votar(@PathVariable int pautaId, @RequestParam String cpf, boolean agree) {	
+		return this.votoService.votar(pautaId, cpf, agree);		
+	}
 
 	@GetMapping("/obterPautas")
 	public List<Pauta> obterPautas() {
